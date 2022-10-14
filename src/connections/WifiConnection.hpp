@@ -5,5 +5,5 @@
 class Connection{
     
     public:
-        setup();
-}
+        void setup();
+};

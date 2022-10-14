@@ -19,6 +19,8 @@
 #include "Adafruit_MQTT.h"
 #include "Adafruit_MQTT_Client.h"
 
+#include "Connection.hpp"
+
 /************************* WiFi Access Point *********************************/
 
 #define WLAN_SSID       "RWD-18719"
@@ -51,6 +53,8 @@ Adafruit_MQTT_Client mqtt(&client, AIO_SERVER, AIO_SERVERPORT, AIO_USERNAME, AIO
 // Setup a feed called 'photocell' for publishing.
 // Notice MQTT paths for AIO follow the form: <username>/feeds/<feedname>
 Adafruit_MQTT_Publish temperatureData = Adafruit_MQTT_Publish(&mqtt, "kevin/3DDrucker/data");
+Adafruit_MQTT_Publish lightStatePubTopic = Adafruit_MQTT_Publish(&mqtt, "kevin/3DDrucker/data/lightState");
+Adafruit_MQTT_Publish logPubTopic = Adafruit_MQTT_Publish(&mqtt, "kevin/3DDrucker/log");
 
 // Setup a feed called 'onoff' for subscribing to changes.
 Adafruit_MQTT_Subscribe toggleLight = Adafruit_MQTT_Subscribe(&mqtt, "kevin/3DDrucker/action/toggleLight", MQTT_QOS_1);
@@ -60,12 +64,20 @@ Adafruit_MQTT_Subscribe toggleLight = Adafruit_MQTT_Subscribe(&mqtt, "kevin/3DDr
 void MQTT_connect();
 
 void toggleLightCallback(char *data, uint16_t len) {
-  Serial.print("Trigger Callback data: ");
+  Serial.print("Trigger toggleLightCallback");
+  logPubTopic.publish("Trigger toggleLightCallback");
   //for(uint16_t i = 0; i <= len; i++){
   //  Serial.print(data[i]);
   //}
   //Serial.println();
-  
+  lightState = !lightState;
+  if(lightState){
+    digitalWrite(RELAY_PIN, LOW);
+  } else {
+    digitalWrite(RELAY_PIN, HIGH);
+  }
+
+  lightStatePubTopic.publish(lightState);
 }
 
 void setup() {
@@ -74,8 +86,7 @@ void setup() {
 
   Serial.println(F("Light Controller 3D Drucker\n\n"));
 
-  // Connect to WiFi access point.
-
+  /* Connection To Wifi */
   Serial.print("Connecting to: ");
   Serial.println(WLAN_SSID);
 
@@ -94,6 +105,12 @@ void setup() {
 
   // Setup MQTT subscription for onoff feed.
   mqtt.subscribe(&toggleLight);
+
+  /* Connection To MQTT */
+  MQTT_connect();
+
+  /* Relay */
+  pinMode(RELAY_PIN, OUTPUT);
 
 }
 
