@@ -7,16 +7,9 @@
 
 
 class MqttConnection{
-    private:
-        uint32_t x = 0;
-        static MqttConnection * instance;
-        Adafruit_MQTT_Client * mqtt;
-        void connect();
-        
 
     public:
         bool lightState = 0;
-        MqttConnection();
         static MqttConnection * getInstance();
         Adafruit_MQTT_Publish * temperatureData;
         Adafruit_MQTT_Publish * lightStatePubTopic;
@@ -24,5 +17,17 @@ class MqttConnection{
         Adafruit_MQTT_Subscribe * toggleLight;
         void setup();
         void loop();
+
+    private:
+        uint32_t x = 0;
+        static MqttConnection * instance;
+        MqttConnection();
+        Adafruit_MQTT_Client * mqtt;
+        void connect();
+
+    
+        
+
+    
 
 };

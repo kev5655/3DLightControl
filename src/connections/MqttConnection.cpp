@@ -14,6 +14,7 @@
 
 #define RELAY_PIN 0
 
+MqttConnection* MqttConnection::instance = NULL;
 
 void toggleLightCallback(char * data, uint16_t len) {
     Serial.print("Trigger toggleLightCallback");
@@ -35,23 +36,31 @@ void toggleLightCallback(char * data, uint16_t len) {
 
 
 MqttConnection::MqttConnection() {
-    WifiConnection wifiConnection;
-    WiFiClient client = wifiConnection.getClient();
-    Adafruit_MQTT_Client mqtt(&client, AIO_SERVER, AIO_SERVERPORT, AIO_USERNAME, AIO_KEY);
+    Serial.println("Call Konstruktor MqttConnection");
+    WifiConnection wifiConnection = WifiConnection();
+    WiFiClient * client = wifiConnection.getClient();
+    Adafruit_MQTT_Client mqtt = Adafruit_MQTT_Client(client, AIO_SERVER, AIO_SERVERPORT, AIO_USERNAME, AIO_KEY);
+    Serial.println(mqtt.ping());
     this -> mqtt = &mqtt;
-    Serial.println("Constructor");
+
 }
 
 MqttConnection * MqttConnection::getInstance() {
-    static MqttConnection * instance;
-    return instance;
+    Serial.println("Get Instance");
+    if (instance == NULL) {
+        Serial.println("Create Instance");
+        instance = new MqttConnection();
+    }
+    Serial.println("Return Instance");
+    return(instance);
 }
 
 
 
 void MqttConnection::setup() {
     // Establish Connection
-    this-> connect();
+    Serial.println("Setup MqttConnection");
+    //this-> connect();
 
     Adafruit_MQTT_Publish publishPtr = Adafruit_MQTT_Publish(this -> mqtt, "kevin/3DDrucker/data");
     this -> temperatureData = &publishPtr;
@@ -70,6 +79,7 @@ void MqttConnection::setup() {
 
     // Setup MQTT subscription for onoff feed.
     this -> mqtt->subscribe(this -> toggleLight);
+    Serial.println("Finish Setup MqttConneciton");
 }
 
 void MqttConnection::loop() {
@@ -95,8 +105,20 @@ void MqttConnection::loop() {
 void MqttConnection::connect() {
     int8_t ret;
 
+    Serial.println("Try Connection");
+
+    //Serial.println(this->mqtt->toString());
+    
+    if(this -> mqtt == NULL){
+        Serial.println("mqtt is Null");
+    } else if(this -> mqtt == nullptr) {
+        Serial.println("mqtt is a nullptr");
+    } else {
+        Serial.println("mqtt is not Null or a nullptr");
+    }
     // Stop if already connected.
     if (this -> mqtt->connected()) {
+        Serial.println("Mqtt is connected");
         return; 
     }
 

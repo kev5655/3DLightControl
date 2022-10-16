@@ -12,6 +12,9 @@
 
 #define RELAY_PIN 0
 
+MqttConnection * mqtt;
+
+
 
 void setup() {
   Serial.begin(115200);
@@ -20,7 +23,6 @@ void setup() {
   Serial.println(F("Light Controller 3D Drucker\n\n"));
 
   //MqttConnection::getInstance()->setup();
-  MqttConnection * mqtt;
   mqtt = MqttConnection::getInstance();
   mqtt->setup();
 
@@ -31,6 +33,9 @@ void setup() {
 
 
 void loop() {
-  //MqttConnection::getInstance()->loop();
+  Serial.println("\n\nLoop");
+
+
+  mqtt->loop();
 
 }

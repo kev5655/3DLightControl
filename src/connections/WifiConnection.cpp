@@ -1,6 +1,6 @@
 #include <Arduino.h>
 #include <ESP8266WiFi.h>
-#include <bits/stdc++.h>
+
 
 #include "WifiConnection.hpp"
 
@@ -11,7 +11,7 @@
 
 
 WifiConnection::WifiConnection(){
-    Serial.println("Setup Connection");
+    Serial.println("Call Construktor WifiConnection");
 
     /* Connection To Wifi */
     Serial.print("Connecting to: ");
@@ -29,6 +29,6 @@ WifiConnection::WifiConnection(){
 
 }
 
-WiFiClient WifiConnection::getClient(){
-    return this -> client;
+WiFiClient * WifiConnection::getClient(){
+    return client;
 }
