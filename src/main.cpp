@@ -5,16 +5,16 @@
 #include "Adafruit_MQTT_Client.h"
 
 #include "connections/WifiConnection.hpp"
-#include "connections/MqttConnection.hpp"
+#include "connections/Mqtt.hpp"
 
 
 
 /**************************** Relay Setup ************************************/
 
 #define RELAY_PIN 0
+unsigned long lastMillis = 0;
 
-MqttConnection * mqtt;
-
+Mqtt * mqtt;
 
 
 void setup() {
@@ -23,22 +23,21 @@ void setup() {
 
   Serial.println(F("Light Controller 3D Drucker\n\n"));
 
-  //MqttConnection::getInstance()->setup();
-  mqtt = MqttConnection::getInstance();
-  mqtt->setup();
-  
 
-  /* Relay */
-  pinMode(RELAY_PIN, OUTPUT);
+  mqtt = new Mqtt();
 
   
 }
 
 
 void loop() {
-  //Serial.println("\n\nLoop");
+
   mqtt->loop();
 
 
-
+  if (millis() - lastMillis > 1000) {
+    lastMillis = millis();
+    mqtt->send("/ESP8266/3DLightControl", "test");
+  }
+  
 }
