@@ -1,9 +1,10 @@
 #include "MqttConnection.hpp"
 
-#include <ESP8266WiFi.h>
+//#include <ESP8266WiFi.h>
+#include <WiFi.h>
 #include <Adafruit_MQTT.h>
 #include <Adafruit_MQTT_Client.h>
-#include "connections/WifiConnection.hpp"
+#include "WifiConnection.hpp"
 
 
 #define AIO_SERVER      "192.168.1.138"
@@ -17,13 +18,13 @@
 MqttConnection* MqttConnection::instance = NULL;
 
 void toggleLightCallback(char * data, uint16_t len) {
-    Serial.print("Trigger toggleLightCallback");
+    //Serial.print("Trigger toggleLightCallback");
     Adafruit_MQTT_Publish * logPubTopicPtr = MqttConnection::getInstance()->logPubTopic;
     logPubTopicPtr->publish("Trigger toggleLightCallback");
     //for(uint16_t i = 0; i <= len; i++){
     //  Serial.print(data[i]);
     //}
-    Serial.println();
+    //Serial.println();
     MqttConnection::getInstance()->lightState = !MqttConnection::getInstance()->lightState;
     if(MqttConnection::getInstance()->lightState){
         digitalWrite(RELAY_PIN, LOW);
@@ -37,11 +38,60 @@ void toggleLightCallback(char * data, uint16_t len) {
 
 MqttConnection::MqttConnection() {
     Serial.println("Call Konstruktor MqttConnection");
-    WifiConnection wifiConnection = WifiConnection();
-    WiFiClient * client = wifiConnection.getClient();
-    Adafruit_MQTT_Client mqtt = Adafruit_MQTT_Client(client, AIO_SERVER, AIO_SERVERPORT, AIO_USERNAME, AIO_KEY);
-    Serial.println(mqtt.ping());
-    this -> mqtt = &mqtt;
+    WifiConnection * wifiConnection = new WifiConnection();
+    WiFiClient client = wifiConnection->getClient();
+    Adafruit_MQTT_Client * mqtt = new Adafruit_MQTT_Client(&client, AIO_SERVER, AIO_SERVERPORT, AIO_USERNAME, AIO_KEY);
+    //Serial.println("Mqtt Connection "+ mqtt->connect());
+    //Serial.println(mqtt->ping());
+    this -> mqtt = mqtt;
+
+    // Establish Connection
+    Serial.println("Setup MqttConnection");
+    this-> connect();
+
+/*
+    Adafruit_MQTT_Publish publishPtr = Adafruit_MQTT_Publish(this -> mqtt, "kevin/3DDrucker/data");
+    this -> temperatureData = &publishPtr;
+    publishPtr = Adafruit_MQTT_Publish(this -> mqtt, "kevin/3DDrucker/data/lightState");
+    this -> lightStatePubTopic = &publishPtr;
+    publishPtr = Adafruit_MQTT_Publish(this -> mqtt, "kevin/3DDrucker/data/lightState");
+    this -> logPubTopic = &publishPtr;
+
+    // Setup a feed called 'onoff' for subscribing to changes.
+    Adafruit_MQTT_Subscribe subscribePtr = Adafruit_MQTT_Subscribe(this -> mqtt, "kevin/3DDrucker/action/toggleLight", MQTT_QOS_1);
+    this -> toggleLight = &subscribePtr;
+
+
+    // Add Callback
+    this -> toggleLight->setCallback(toggleLightCallback);
+
+    // Setup MQTT subscription for onoff feed.
+    this -> mqtt->subscribe(this -> toggleLight);
+    Serial.println("Finish Setup MqttConneciton");
+
+
+
+    Serial.println("\n\nLoop");
+    //this -> connect();
+
+    mqtt->processPackets(1000);
+
+    // Now we can publish stuff!
+    Serial.print(F("\nSending val "));
+    Serial.print(this -> x);
+    Serial.print("...");
+    if (! this-> temperatureData->publish(this -> x++)) {
+        Serial.println(F("Failed"));
+    } else {
+        Serial.println(F("OK!"));
+    }
+
+    if (! this -> mqtt->ping()) {
+        this -> mqtt->disconnect();
+    }
+*/
+
+
 
 }
 
@@ -79,18 +129,16 @@ void MqttConnection::setup() {
 
     // Setup MQTT subscription for onoff feed.
     this -> mqtt->subscribe(this -> toggleLight);
-    Serial.println("Finish Setup MqttConneciton");
+    //Serial.println("Finish Setup MqttConneciton");
+    
 }
 
 void MqttConnection::loop() {
+    Serial.println("\n\nLoop");
     this -> connect();
 
     this -> mqtt->processPackets(1000);
 
-    // Now we can publish stuff!
-    Serial.print(F("\nSending photocell val "));
-    Serial.print(this -> x);
-    Serial.print("...");
     if (! this-> temperatureData->publish(this -> x++)) {
         Serial.println(F("Failed"));
     } else {
@@ -107,7 +155,6 @@ void MqttConnection::connect() {
 
     Serial.println("Try Connection");
 
-    //Serial.println(this->mqtt->toString());
     
     if(this -> mqtt == NULL){
         Serial.println("mqtt is Null");
@@ -125,8 +172,9 @@ void MqttConnection::connect() {
     Serial.print("Connecting to MQTT... ");
 
     uint8_t retries = 3;
-    while ((ret = (this -> mqtt->connect())) != 0) { // connect will return 0 for connected
-        Serial.println(this -> mqtt->connectErrorString(ret));
+    while ((ret = (mqtt->connect())) != 0) { // connect will return 0 for connected
+        String error = this -> mqtt->connectErrorString(ret);
+        Serial.println(error);
         Serial.println("Retrying MQTT connection in 5 seconds...");
         this -> mqtt->disconnect();
         delay(5000);  // wait 5 seconds

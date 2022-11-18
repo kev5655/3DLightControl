@@ -1,8 +1,10 @@
 #include <Arduino.h>
-#include <ESP8266WiFi.h>
-
+//#include <ESP8266WiFi.h>
+#include <WiFi.h>
 
 #include "WifiConnection.hpp"
+
+
 
 /************************* WiFi Access Point *********************************/
 
@@ -11,11 +13,11 @@
 
 
 WifiConnection::WifiConnection(){
-    Serial.println("Call Construktor WifiConnection");
+    //Serial.println("Call Construktor WifiConnection");
 
     /* Connection To Wifi */
-    Serial.print("Connecting to: ");
-    Serial.println(WLAN_SSID);
+    //Serial.print("Connecting to: ");
+    //Serial.println(WLAN_SSID);
 
     WiFi.begin(WLAN_SSID, WLAN_PASS);
     while (WiFi.status() != WL_CONNECTED) {
@@ -23,12 +25,13 @@ WifiConnection::WifiConnection(){
         Serial.print(".");
     }
 
-    Serial.println();
+    //Serial.println();
     Serial.println("WiFi connected");
-    Serial.print("IP address: "); Serial.println(WiFi.localIP());
+    //Serial.print("IP address: "); Serial.println(WiFi.localIP());
 
 }
 
-WiFiClient * WifiConnection::getClient(){
+WiFiClient WifiConnection::getClient(){
+    Serial.println("Get Client");
     return client;
 }

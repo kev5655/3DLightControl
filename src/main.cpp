@@ -1,5 +1,6 @@
 
-#include <ESP8266WiFi.h>
+//#include <ESP8266WiFi.h>
+#include <WiFi.h>
 #include "Adafruit_MQTT.h"
 #include "Adafruit_MQTT_Client.h"
 
@@ -25,17 +26,19 @@ void setup() {
   //MqttConnection::getInstance()->setup();
   mqtt = MqttConnection::getInstance();
   mqtt->setup();
+  
 
   /* Relay */
   pinMode(RELAY_PIN, OUTPUT);
 
+  
 }
 
 
 void loop() {
-  Serial.println("\n\nLoop");
-
-
+  //Serial.println("\n\nLoop");
   mqtt->loop();
+
+
 
 }

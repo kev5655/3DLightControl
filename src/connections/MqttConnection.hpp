@@ -1,7 +1,8 @@
 #pragma once
 
 #include <Arduino.h>
-#include <ESP8266WiFi.h>
+//#include <ESP8266WiFi.h>
+#include <WiFi.h>
 #include <Adafruit_MQTT.h>
 #include <Adafruit_MQTT_Client.h>
 
