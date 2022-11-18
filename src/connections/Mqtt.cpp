@@ -6,11 +6,16 @@ void messageReceived(String &topic, String &payload) {
     Serial.println("Message Received: " + payload + " from Topic: " + topic);
 }
 
-Mqtt::Mqtt() {
+Mqtt::Mqtt(MQTTClientCallbackSimpleFunction func) {
     WiFi.begin("RWD-18719", "ra5t-hmtc-0bwb-ioy7");
     client.begin("192.168.1.138", net);
-    client.onMessage(messageReceived);
+    client.onMessage(func);
+    
     connect();
+
+    client.subscribe("/3D-Drucker/LightControl/action/toggleLight");
+    client.subscribe("/3D-Drucker/LightControl/action/setIntervalForSendingData");
+
 }
 
 void Mqtt::connect() {
@@ -29,8 +34,6 @@ void Mqtt::connect() {
     }
 
     Serial.println("\nconnected!");
-
-    client.subscribe("/hello");
 }
 
 void Mqtt::loop() {
@@ -40,6 +43,8 @@ void Mqtt::loop() {
     }
 }
 
+
+// need 0.5 Second for Sending values
 void Mqtt::send(String topic, String payload) {
     client.publish(topic, payload);
 }
