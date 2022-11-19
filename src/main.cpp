@@ -10,7 +10,7 @@
 /**************************** Relay Setup ************************************/
 
 // Relay
-#define RELAY_PIN 2          // ESP32 Pin: 16, GPIO16 / EPS8266 Pin: 2
+#define RELAY_PIN 14          // ESP32 Pin: ..., / EPS8266 Pin: 14
 Relay * relay;
 
 // Temp Sensor
