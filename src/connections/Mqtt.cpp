@@ -2,6 +2,7 @@
 
 #include "Mqtt.hpp"
 #include "Secret.hpp"
+#include "MqttTopics.hpp"
 
 Mqtt::Mqtt(MQTTClientCallbackSimpleFunction func)
 {
@@ -13,8 +14,8 @@ Mqtt::Mqtt(MQTTClientCallbackSimpleFunction func)
 
     connect();
 
-    nasClient.subscribe("/3D-Drucker/LightControl/action/toggleLight");
-    nasClient.subscribe("/3D-Drucker/LightControl/action/setIntervalForSendingData");
+    nasClient.subscribe(TOGGLE_LIGHT_RECEIVE_TOPIC);
+    nasClient.subscribe(SET_INTERVAL_TIME_RECEIVE_TOPIC);
 }
 
 void Mqtt::connect()
