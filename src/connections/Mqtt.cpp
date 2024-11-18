@@ -1,24 +1,24 @@
 #include <Arduino.h>
 
 #include "Mqtt.hpp"
+#include "Secret.hpp"
 
-void messageReceived(String &topic, String &payload) {
-    Serial.println("Message Received: " + payload + " from Topic: " + topic);
-}
-
-Mqtt::Mqtt(MQTTClientCallbackSimpleFunction func) {
+Mqtt::Mqtt(MQTTClientCallbackSimpleFunction func)
+{
     WiFi.begin(SECRET_SSID, SECRET_PASS);
-    client.begin(NAS_IP, net);
-    client.onMessage(func);
-    
+    nasClient.begin(NAS_IP, net);
+    nasClient.onMessage(func);
+
+    octoPrintClient.begin(OCTO_PRINT_IP, net);
+
     connect();
 
-    client.subscribe("/3D-Drucker/LightControl/action/toggleLight");
-    client.subscribe("/3D-Drucker/LightControl/action/setIntervalForSendingData");
-
+    nasClient.subscribe("/3D-Drucker/LightControl/action/toggleLight");
+    nasClient.subscribe("/3D-Drucker/LightControl/action/setIntervalForSendingData");
 }
 
-void Mqtt::connect() {
+void Mqtt::connect()
+{
     Serial.print("checking wifi...");
     while (WiFi.status() != WL_CONNECTED)
     {
@@ -26,8 +26,16 @@ void Mqtt::connect() {
         delay(1000);
     }
 
-    Serial.print("\nconnecting...");
-    while (!client.connect("arduino", "public", "public"))
+    Serial.print("\nconnecting to nas...");
+    while (!nasClient.connect("3DLightControl", MQTT_NAS_USER, MQTT_NAS_PASS))
+    {
+        Serial.print(".");
+        delay(1000);
+    }
+
+    Serial.print("\nconnected!\nconnecting to octo print...");
+    while (!octoPrintClient.connect("3DLightControl",
+                                    MQTT_OCTO_PRINT_USER, MQTT_OCTO_PRINT_PASS))
     {
         Serial.print(".");
         delay(1000);
@@ -36,15 +44,23 @@ void Mqtt::connect() {
     Serial.println("\nconnected!");
 }
 
-void Mqtt::loop() {
-    client.loop();
-    if(!client.connected()) {
+void Mqtt::loop()
+{
+    nasClient.loop();
+    if (!nasClient.connected())
+    {
+        connect();
+    }
+    octoPrintClient.loop();
+    if (!octoPrintClient.connected())
+    {
         connect();
     }
 }
 
-
 // need 0.5 Second for Sending values
-void Mqtt::send(String topic, String payload) {
-    client.publish(topic, payload);
+void Mqtt::send(String topic, String payload)
+{
+    nasClient.publish(topic, payload);
+    octoPrintClient.publish(topic, payload);
 }

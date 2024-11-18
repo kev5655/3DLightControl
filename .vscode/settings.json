@@ -3,6 +3,7 @@
         "Adafruit",
         "kevin",
         "mqtt",
+        "octo",
         "wifi"
     ],
     "files.associations": {

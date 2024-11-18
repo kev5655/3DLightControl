@@ -4,16 +4,16 @@
 #include <ESP8266WiFi.h>
 #include <MQTT.h>
 
-class Mqtt {
+class Mqtt
+{
+public:
+    Mqtt(MQTTClientCallbackSimpleFunction func);
+    void loop();
+    void send(String topic, String payload);
 
-    public:
-        Mqtt(MQTTClientCallbackSimpleFunction func);
-        void loop();
-        void send(String topic, String payload);
-
-    private:
-        WiFiClient net;
-        MQTTClient client;
-        void connect();
-        
+private:
+    WiFiClient net;
+    MQTTClient nasClient;
+    MQTTClient octoPrintClient;
+    void connect();
 };
